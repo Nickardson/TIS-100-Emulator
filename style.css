@@ -1,0 +1,168 @@
+/* http://www.fixedsysexcelsior.com/ */
+/*@font-face {
+	font-family: "FSEX300";
+	src: url('FSEX300.ttf');
+}*/
+
+body, textarea {
+	/* not using FixedSysExcelsior because of subpixel rendering
+	font-family: "FSEX300", monospace;
+	font-smooth: never;
+	-webkit-font-smoothing : none;
+	*/
+	background-color: black;
+	color: #cfcfcf;
+	font-family: "Consolas", "Courier New", monospace;
+	font-size: 14px;
+	line-height: 14px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+/* ==================== */
+/* Sidebar              */
+/* ==================== */
+#sidebar {
+	height: 100vh;
+	width: 25%;
+	float: left;
+	position: relative;
+}
+
+.statebutton {
+	background-color: black;
+	border: 1px double #cfcfcf;
+	border-width: 3px;
+	width: 22%;
+	position: relative;
+	color: white;
+}
+.statebutton:before{
+	content: "";
+	display: block;
+	padding-top: 100%; 	/* initial ratio of 1:1*/
+}
+.statebutton:hover {
+	background-color: gray;
+}
+
+.test_name {
+	text-align: center;
+}
+
+.infobox {
+	padding: 10px;
+	margin: 10px;
+}
+
+#inputoutput {
+	width: 100%;
+}
+#inputoutput td {
+	vertical-align: top;
+	text-align: center;
+}
+#inputoutput table {
+	margin: 0 auto 0 auto;
+}
+
+table.datalist {
+	list-style: none;
+	padding: 5px;
+	margin: 5px;
+	line-height: .5em;
+	border-collapse: collapse;
+	border-bottom: 1px double #cfcfcf;
+	border-top: 1px double #cfcfcf;
+	border-width: 3px;
+}
+table.datalist td {
+	padding: 5px;
+	border-right: 1px double #cfcfcf;
+	border-width: 3px;
+}
+table.datalist tr {
+	border-left: 1px double #cfcfcf;
+	border-width: 3px;
+}
+
+.table2row td {
+	width: 50%;
+}
+
+/* ==================== */
+/* Computer             */
+/* ==================== */
+.computer {
+	border-spacing: 20px;
+}
+
+.cellcontainer {
+	width: 20vmin;
+	height: 20vmin;	
+}
+.cell {
+	height: 100%;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.box {
+	white-space: pre-line;
+}
+
+.cell td, .box {
+	border: 1px double #cfcfcf;
+	border-width: 3px;
+}
+
+/* cell td and td.srccontainer width should add to 100% */
+.cell td {
+	width: 25%;
+	text-align: center;
+}
+td.srccontainer {
+	width: 75%;
+	height: 100%;
+	text-align: left;
+	vertical-align: top;
+}
+
+.src {
+	height: 95%; /*wtf chrome is melting at 100% height*/
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	overflow: auto;
+}
+
+ul.src {
+	list-style-type: none;
+}
+
+ul.src>li {
+	width: 100%;
+}
+ul.src>li.active {
+	background-color: #9a9a9a;
+	color: black;
+}
+
+/* making a textarea not really a textarea */
+textarea.srcarea {
+	border: none;
+	outline: none;
+	display: block;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	background-color: transparent;
+	resize: none;
+	outline: none;
+}
+
+.arrow {
+	text-align: center;
+	font-size: 2em;
+}
