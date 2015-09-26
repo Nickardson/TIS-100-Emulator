@@ -253,7 +253,7 @@ function lua_table_to_array(L, table) {
 	return stacky;
 }
 
-$.get('/puzzles/01_diagnostic.lua', function (data) {
+$.get('puzzles/01_diagnostic.lua', function (data) {
 	var L = new Lua.State();
 	prepareLuaPuzzleState(L);
 	
