@@ -7,59 +7,35 @@
 	</head>
 	<body>
 		<div id="sidebar">
-			<div class="test_name">- Self-Test Diagnostic -</div>
+			<div id="test_name">- Puzzle not loaded -</div>
 
 			<div class="infobox box">&gt; Read a value from in.x and write the value to out.x
 				&gt; Read a value from in.a and write the value to out.a
 			</div>
 
 			<table id="inputoutput">
-				<tr>
-					<td>in.x</td>
-					<td>in.a</td>
-					<td>out.x</td>
-					<td>out.a</td>
-				</tr>
-				<tr>
-					<td><table class="datalist">
-						<tr><td>12</td></tr>
-						<tr><td>34</td></tr>
-					</table></td>
-
-					<td><table class="datalist">
-						<tr><td>56</td></tr>
-						<tr><td>78</td></tr>
-						
-					</table></td>
-
-					<td><table class="datalist table2row">
-						<tr><td>12</td><td></td></tr>
-						<tr><td>34</td><td></td></tr>
-					</table></td>
-
-					<td><table class="datalist table2row">
-						<tr><td>56</td><td></td></tr>
-						<tr><td>78</td><td></td></tr>
-					</table></td>
-				</tr>
+				<tr id="io_titles"></tr>
+				<tr id="io_data"></tr>
 			</table>
 
 			<br/>
 			<br/>
 
-			<button id="btn_stop" class="statebutton">Stop</button>
-			<button id="btn_step" class="statebutton">Step</button>
-			<button id="btn_run" class="statebutton">Run</button>
-			<button id="btn_fast" class="statebutton">Fast</button>
+			<button id="btn_stop" class="statebutton">STOP</button>
+			<button id="btn_step" class="statebutton">STEP</button>
+			<button id="btn_run" class="statebutton">RUN</button>
+			<button id="btn_fast" class="statebutton">FAST</button>
 		</div>
 
-		<table class="computer"></table>
+		<div id="computercontainer"></div>
 
 		<noscript>
 			This TIS-100 emulator requires javascript to run.
 		</noscript>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="lua.vm.js"></script>
 		<script src="main.js"></script>
+		<script src="logic.js"></script>
 	</body>
 </html>

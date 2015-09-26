@@ -10,35 +10,15 @@ var COMPUTER_CELL_WIDTH = 4;
  */
 var COMPUTER_CELL_HEIGHT = 3;
 
-var cells = [];
-var arrows = [];
-
-function Instruction(text) {
-	this.text = text;
-	this.active = false;
-
-	this.toString = function () {
-		return this.text;
-	}
-}
-
 /**
- * Creates a cell.
- * @return {Cell} The created cell
+ * Creates the html elements for a cell.
+ * @return {{element, instructionElement, srcElement, accElement, bakElement, lastElement, modeElement, idleElement, stackElement}} The created cell
  */
-function createCell(x, y) {
-	var cell = {
-		instructions: [
-			new Instruction("mov up acc"),
-			new Instruction("sav"),
-			new Instruction("add acc"),
-		]
-	};
-
-	cell.instructions[1].active = true;
+function createCell(x, y, type) {
+	var cell = {};
 
 	var e = $('<table>')
-		.addClass('cell');
+		.addClass('cell cell' + type);
 	cell.element = e;
 
 	var firstRow = $('<tr>')
@@ -50,7 +30,6 @@ function createCell(x, y) {
 
 	cell.instructionElement = $('<ul class="src" style="display:none">').appendTo(srcContainer);
 	cell.srcElement = $('<textarea></textarea>')
-		.val(cell.instructions.join('\n'))
 		.addClass('src srcarea')
 		.attr({
 			'id': 'src_' + x + '_' + y,
@@ -61,11 +40,22 @@ function createCell(x, y) {
 			'spellcheck': 'false',
 		})
 		.appendTo(srcContainer);
-	cell.accElement = $('<td>ACC<br/><span>0</span></td>').appendTo(firstRow).find('span'); // acc is added to the first row, since the content has rowspan of 5.
+	cell.accElement = $('<td style="position:relative">ACC<br/><span>0</span></td>').appendTo(firstRow).find('span'); // acc is added to the first row, since the content has rowspan of 5.
 	cell.bakElement = $('<tr><td>BAK<br/><span>(0)</span></td></tr>').appendTo(e).find('span');
 	cell.lastElement = $('<tr><td>LAST<br/><span>N/A</span></td></tr>').appendTo(e).find('span');
 	cell.modeElement = $('<tr><td>MODE<br/><span>IDLE</span></td></tr>').appendTo(e).find('span');
 	cell.idleElement = $('<tr><td>IDLE<br/><span>0%</span></td></tr>').appendTo(e).find('span');
+
+	if (type == TileType.TILE_DAMAGED) {
+		// TODO: comm failure
+		cell.srcElement.css('display', 'none');
+		cell.instructionElement.css('display', 'block').addClass('cellfail').html('<div class="celltext">COMMUNICATION FAILURE</div>');
+	} else if (type == TileType.TILE_MEMORY) {
+		cell.srcElement.css('display', 'none');
+		cell.accElement.addClass('stacklist').html('<div>3</div><div>3</div><div>3</div><div>3</div><div>3</div><div>3</div><div>3</div><div>3</div><div>3</div>');
+		cell.stackElement = cell.accElement;
+		cell.instructionElement.css('display', 'block').addClass('cellstack').html('<div class="celltext">STACK MEMORY NODE</div>');
+	}
 
 	cell.setInstructions = function (visible) {
 		if (visible) {
@@ -88,57 +78,76 @@ function createCell(x, y) {
 	return cell;
 }
 
-for (var y = 1; y <= COMPUTER_CELL_HEIGHT; y++) {
-	var row = [];
-	cells.push(row);
+function createField(puzzle) {
+	var cells = [];
+	var arrows = [];
 
-	var cellRowElement = $('<tr>').appendTo('.computer');
-	// table row for up/down arrows in between cells
-	var harrowRowElement = $('<tr>').appendTo('.computer');
+	var computer = $('<table>').addClass('computer');
 
-	for (var x = 1; x <= COMPUTER_CELL_WIDTH; x++) {
-		var cell = createCell(x, y);
-		$('<td>')
-			.append(cell.element)
-			.addClass('cellcontainer')
-			.attr({
-				'id': 'cell_' + x + '_' + y
-			})
-			.appendTo(cellRowElement);
+	for (var y = 0; y < puzzle.height; y++) {
+		var row = [];
+		cells.push(row);
 
-		// Don't add an arrow row on the last set.
-		if (y != COMPUTER_CELL_HEIGHT) {
-			var harrow = {};
-			harrow.element = $('<td>')
+		var cellRowElement = $('<tr>').appendTo(computer);
+		// table row for up/down arrows in between cells
+		var harrowRowElement = $('<tr>').appendTo(computer);
+
+		for (var x = 0; x < puzzle.width; x++) {
+			var cell = createCell(x, y, puzzle.cells[y][x].type);
+			$('<td>')
+				.append(cell.element)
+				.addClass('cellcontainer')
 				.attr({
-					'id': 'harrow_' + x + '_' + y
+					'id': 'cell_' + x + '_' + y
 				})
-				.html('&uarr; &darr;')
-				.addClass('arrow')
-				.appendTo(harrowRowElement);
-			
-		}
-
-		if (x != COMPUTER_CELL_WIDTH) {
-			var varrow = {};
-			varrow.element = $('<td>')
-				.attr({
-					'id': 'varrow_' + x + '_' + y
-				})
-				.html('&rarr;<br/>&larr;')
-				.addClass('arrow')
 				.appendTo(cellRowElement);
 
-			// add an extra cell to the arrow row below, to space properly.
-			$('<td>').appendTo(harrowRowElement);
-		}
+			// Don't add an arrow row on the last set.
+			if (y != COMPUTER_CELL_HEIGHT) {
+				var harrow = {};
+				harrow.element = $('<td>')
+					.attr({
+						'id': 'harrow_' + x + '_' + y
+					})
+					.html('&uarr; &darr;')
+					.addClass('arrow')
+					.appendTo(harrowRowElement);
+				
+			}
 
-		row.push(cell);
+			if (x != COMPUTER_CELL_WIDTH) {
+				var varrow = {};
+				varrow.element = $('<td>')
+					.attr({
+						'id': 'varrow_' + x + '_' + y
+					})
+					.html('&rarr;<br/>&larr;')
+					.addClass('arrow')
+					.appendTo(cellRowElement);
+
+				// add an extra cell to the arrow row below, to space properly.
+				$('<td>').appendTo(harrowRowElement);
+			}
+
+			row.push(cell);
+		}
 	}
+
+	return {
+		computer: computer,
+		cells: cells,
+		arrows: arrows
+	};
 }
+
+var active_puzzle;
 
 // use ctrl+arrow keys to move cursor around cells
 $('body').keydown(function (e) {
+	if (active_puzzle == undefined) {
+		return;
+	}
+
 	var isMove = false, relX = 0, relY = 0;
 	if (e.ctrlKey) {
 		// set to false in 'else'
@@ -166,7 +175,7 @@ $('body').keydown(function (e) {
 			var y = loc[2] - 1 + relY;
 
 			if (x >= 0 && x < COMPUTER_CELL_WIDTH && y >= 0 && y < COMPUTER_CELL_HEIGHT)
-				cells[y][x].srcElement.focus();
+				active_puzzle.cells[y][x].srcElement.focus();
 
 			return false;
 		}

@@ -24,18 +24,18 @@ body, textarea {
 /* ==================== */
 #sidebar {
 	height: 100vh;
-	width: 25%;
+	width: 20%;
 	float: left;
 	position: relative;
 }
 
 .statebutton {
 	background-color: black;
-	border: 1px double #cfcfcf;
-	border-width: 3px;
+	border: 3px double #cfcfcf;
 	width: 22%;
 	position: relative;
 	color: white;
+	cursor: pointer;
 }
 .statebutton:before{
 	content: "";
@@ -46,9 +46,9 @@ body, textarea {
 	background-color: gray;
 }
 
-.test_name {
-	text-align: center;
-}
+#test_name {text-align: center;}
+#test_name:before {content: '- ';}
+#test_name:after {content: ' -';}
 
 .infobox {
 	padding: 10px;
@@ -66,24 +66,26 @@ body, textarea {
 	margin: 0 auto 0 auto;
 }
 
+.outputwrong {
+	background-color: #a60d0d;
+	color: black;
+}
+
 table.datalist {
 	list-style: none;
 	padding: 5px;
 	margin: 5px;
 	line-height: .5em;
 	border-collapse: collapse;
-	border-bottom: 1px double #cfcfcf;
-	border-top: 1px double #cfcfcf;
-	border-width: 3px;
+	border-bottom: 3px double #cfcfcf;
+	border-top: 3px double #cfcfcf;
 }
 table.datalist td {
 	padding: 5px;
-	border-right: 1px double #cfcfcf;
-	border-width: 3px;
+	border-right: 3px double #cfcfcf;
 }
 table.datalist tr {
-	border-left: 1px double #cfcfcf;
-	border-width: 3px;
+	border-left: 3px double #cfcfcf;
 }
 
 .table2row td {
@@ -98,12 +100,20 @@ table.datalist tr {
 }
 
 .cellcontainer {
-	width: 20vmin;
-	height: 20vmin;	
+	width: 200px;
+	height: 200px;	
 }
+
+@media (max-width: 900px) {
+	.src.cellfail .celltext {
+		display: none;
+	}
+}
+
 .cell {
 	height: 100%;
 	width: 100%;
+	position: relative;
 	border-collapse: collapse;
 }
 
@@ -112,8 +122,7 @@ table.datalist tr {
 }
 
 .cell td, .box {
-	border: 1px double #cfcfcf;
-	border-width: 3px;
+	border: 3px double #cfcfcf;
 }
 
 /* cell td and td.srccontainer width should add to 100% */
@@ -121,6 +130,61 @@ table.datalist tr {
 	width: 25%;
 	text-align: center;
 }
+
+.celltext {
+	margin-top: 30%;
+	margin-left: 10%;
+	padding: 10px 0px 10px 0px;
+	border-top: 12px solid #cfcfcf;
+	border-bottom: 12px solid #cfcfcf;
+}
+
+.cell2 {
+	border: 3px double #cfcfcf;
+}
+.cell2 td {
+	color: black;
+	cursor: default;
+	border: 0;
+	border-left: 3px double #cfcfcf;
+}
+
+.stacklist {
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding-top: 10px;
+	text-align: center;
+	color: #cfcfcf;
+	width: 100%;
+}
+.stacklist>div {
+	width: 100%;
+}
+.stacklist>div:last-child {
+	background-color: #a60d0d;
+}
+
+.cell.cell3 td {
+	border: 3px solid #a60d0d;
+	color: black;
+	cursor: default;
+}
+.src.cellstack, .src.cellfail {
+	color: #cfcfcf;
+	text-align: center;
+	vertical-align: middle;
+	width: 90%;
+	overflow: hidden;
+}
+
+.src.cellfail {
+	color: #a60d0d;
+}
+.cellfail .celltext {
+	border-color: #a60d0d;
+}
+
 td.srccontainer {
 	width: 75%;
 	height: 100%;
