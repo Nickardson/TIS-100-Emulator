@@ -1,9 +1,9 @@
 define(['Node'], function (Node) {
-	var Opcode = function (node) {
+	var Opcode = function (node, action) {
 		this.node = node;
 
 		this.check = function () {return true;};
-		this.action = function () {};
+		this.action = action || function () {};
 		this.first = function () {};
 		this.post = function () {};
 	}
@@ -20,44 +20,12 @@ define(['Node'], function (Node) {
 		return false;
 	};
 
-	
-	Opcode.SWP = function (node) {
-		var op = new Opcode(node);
-		
-		op.action = function () {
-			node.setACCandBAK(node.bak, node.acc);
-		}
-
-		return op;
-	};
-
-	/**
-	 * A set of Opcode factories, which return an Opcode.
-	 * @type {Object}
-	 */
-	Opcode.ADD = function (node, src) {
-		var op = new Opcode(node);
-		
-		op.action = function () {
-			if (node.hasData(src)) {
-				node.setACC(node.acc + node.read(src));
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		return op;
-	};
-
 	Opcode.NOP = function (node) {
 		return Opcode.ADD(node, Node.DataLocation.NIL);
 	};
 
 	Opcode.MOV = function (node, src, dst) {
-		var op = new Opcode(node);
-
-		op.action = function (t) {
+		return new Opcode(node, function (t) {
 			if (t == 0)
 				node.queuedDest = dst;
 			if (!node.hasData(src))
@@ -85,10 +53,53 @@ define(['Node'], function (Node) {
 			}
 
 			return t != 0 && node.queuedDest == Node.DataLocation.NONE;
-		}
-
-		return op;
+		});
 	}
+
+	Opcode.SWP = function (node) {
+		return new Opcode(node, function () {
+			node.setACCandBAK(node.bak, node.acc);
+			return true;
+		});
+	};
+
+	Opcode.SAV = function (node) {
+		return new Opcode(node, function () {
+			node.setBAK(node.acc);
+			return true;
+		});
+	};
+
+	Opcode.ADD = function (node, src) {
+		return new Opcode(node, function () {
+			if (node.hasData(src)) {
+				node.setACC(node.acc + node.read(src));
+				return true;
+			} else {
+				return false;
+			}
+		});
+	};
+
+	Opcode.SUB = function (node, src) {
+		return new Opcode(node, function () {
+			if (node.hasData(src)) {
+				node.setACC(node.acc - node.read(src));
+				return true;
+			} else {
+				return false;
+			}
+		});
+	};
+
+	Opcode.NEG = function (node) {
+		return new Opcode(node, function () {
+			node.setACC(-node.acc);
+			return true;
+		});
+	};
+
+	// TODO: JMP, JEZ, JNZ, JGZ, JLZ, JRO
 
 	return Opcode;
 });

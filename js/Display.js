@@ -1,4 +1,4 @@
-define(['Node'], function (Node) {
+define(['Node', 'Computer'], function (Node, Computer) {
 	var Display = {};
 
 	Display.NodeDisplay = function (node) {
@@ -57,20 +57,34 @@ define(['Node'], function (Node) {
 			this.accElement.text(this.node.acc);
 			this.bakElement.text('(' + this.node.bak + ')');
 			
-			// this.srcElement.val(this.node.instructions.join('\n'));
-			this.srcElement.css('display', 'none');
-			this.instructionElement.css('display', 'block');
-			this.instructionElement.empty();
+			if (this.srcElement.css('display') != 'none') {
+				// TODO: this caching saves lots of cpu time, but can it be futher improved?
+				this.srcElement.css('display', 'none');
+				this.instructionElement.css('display', 'block');
+				this.instructionElement.empty();
+				this.cachedInstructions = [];
 
-			for (var i = 0; i < this.node.instructions.length; i++) {
-				$('<li>' + this.node.instructions[i].toString() + '</li>').appendTo(this.instructionElement);
+				// it ain't a premature optimization if it gives a 4-5x speed increase.
+				for (var i = 0; i < this.node.instructions.length; i++) {
+					this.cachedInstructions[i] = $('<li>' + this.node.instructions[i].toString() + '</li>').appendTo(this.instructionElement);
+				}
 			}
 
-			this.instructionElement.find('.active').removeClass('active');
+			if (!this.cachedCurrentop || this.cachedCurrentop != this.node.currentop) {
+				this.cachedCurrentop = this.node.currentop;
 
-			if (this.node.currentop >= 0)
-				this.instructionElement.find(':nth-child(' + (this.node.currentop + 1) + ')').addClass('active');
-
+				if (this.cachedActiveInstruction)
+					this.cachedActiveInstruction.removeClass('active');
+				else
+					this.instructionElement.find('.active').removeClass('active');
+				
+				if (this.node.currentop >= 0 && this.node.instructions.length > 0) {
+					if (this.cachedInstructions)
+						this.cachedActiveInstruction = this.cachedInstructions[this.node.currentop].addClass('active');
+					else // fallback, shouldn't be needed.
+						this.cachedActiveInstruction = this.instructionElement.find(':nth-child(' + (this.node.currentop + 1) + ')').addClass('active');
+				}
+			}
 		} else if (this.node.type == Node.Type.TILE_MEMORY) {
 			this.stackList.html(this.node.stack.join('<br/>'));
 		}
@@ -83,6 +97,40 @@ define(['Node'], function (Node) {
 		var arrows = [];
 
 		var computer = $('<table>').addClass('computer').appendTo('#computercontainer');
+
+		var io_titles = $('#io_titles').empty();
+		var io_data = $('#io_data').empty();
+
+		for (var i = 0; i < puzzle.streams.length; i++) {
+			var stream = puzzle.streams[i];
+
+			if (stream[0] == Computer.StreamType.STREAM_INPUT) {
+				puzzle.columnsIn[stream[2]] = stream;
+			} else if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
+				puzzle.columnsOut[stream[2]] = stream;
+				puzzle.streamsOutput[stream[2]] = [];
+			}
+
+			$('<td>').text(stream[1]).appendTo(io_titles);
+
+			var table = $('<td><table class="datalist"></table></td>').appendTo(io_data).find('table');
+			for (var j = 0; j < stream[3].length; j++) {
+				var row = $('<tr></tr>').appendTo(table);
+				
+				// TODO: implement STREAM_IMAGE
+				if (stream[0] != Computer.StreamType.STREAM_IMAGE) {
+					$('<td>').html(stream[3][j]).appendTo(row);
+				}
+				if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
+					puzzle.streamsOutput[stream[2]][j] = $('<td>').appendTo(row);
+					table.addClass('table2row');
+				}
+			}
+		}
+
+		// each line starts with a '> ', line breaks after each additional.
+		$('#test_name').text(puzzle.name);
+		$('#test_desc').html('&gt; ' + puzzle.description.join('<br/>&gt; '));
 
 		for (var y = 0; y < puzzle.height; y++) {
 			cells[y] = [];

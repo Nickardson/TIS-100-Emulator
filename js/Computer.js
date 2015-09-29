@@ -63,44 +63,6 @@ define(['Node'], function (Node) {
 	};
 
 	/**
-	 * Displays this Computer as in the window.
-	 */
-	Computer.prototype.display = function() {
-		$('#test_name').text(this.name);
-
-		var io_titles = $('#io_titles').empty();
-		var io_data = $('#io_data').empty();
-
-		for (var i = 0; i < this.streams.length; i++) {
-			var stream = this.streams[i];
-
-			if (stream[0] == Computer.StreamType.STREAM_INPUT) {
-				this.columnsIn[stream[2]] = stream;
-			} else if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
-				this.columnsOut[stream[2]] = stream;
-
-				this.streamsOutput[stream[2]] = [];
-			}
-
-			$('<td>').text(stream[1]).appendTo(io_titles);
-
-			var table = $('<td><table class="datalist"></table></td>').appendTo(io_data).find('table');
-			for (var j = 0; j < stream[3].length; j++) {
-				var row = $('<tr></tr>').appendTo(table);
-				
-				// TODO: implement STREAM_IMAGE
-				if (stream[0] != Computer.StreamType.STREAM_IMAGE) {
-					$('<td>').html(stream[3][j]).appendTo(row);
-				}
-				if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
-					this.streamsOutput[stream[2]][j] = $('<td>').appendTo(row);
-					table.addClass('table2row');
-				}
-			}
-		}
-	};
-
-	/**
 	 * Runs the given function for each node, with the node as the first argument.
 	 * @param  {Function} f Function called over each node
 	 */

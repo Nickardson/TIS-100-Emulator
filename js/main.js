@@ -1,5 +1,10 @@
 requirejs.config({
-    baseUrl: 'js'
+    baseUrl: 'js',
+
+    paths: {
+    	lua: '../lua',
+    	puzzles: '../puzzles'
+    }
 });
 
 var the_puzzle;
@@ -50,8 +55,6 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 	PuzzleLoader.loadFromURL('puzzles/01_diagnostic.lua', function (puzzle1) {
 		the_puzzle = puzzle1;
 
-		puzzle1.display();
-
 		{
 			// puzzle1.setTextAt(0, 0, "add 112\nsub 11\nmov acc down");
 			var cell = puzzle1.getNode(0, 0);
@@ -78,21 +81,19 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 			// puzzle1.setTextAt(0, 0, "add 112\nsub 11\nmov acc down");
 			var cell = puzzle1.getNode(2, 1);
 			if (cell) {
-				cell.instructions = ['ADD 112', 'ADD -11', 'MOV ACC UP'];
-				cell.opcodes.push(Opcode.ADD(cell, {constant: 112}));
-				cell.opcodes.push(Opcode.ADD(cell, {constant: -11}));
-				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.ACC, Node.DataLocation.UP));
+				cell.instructions = ['ADD UP', 'neg', 'SUB UP'];
+				cell.opcodes.push(Opcode.ADD(cell, Node.DataLocation.UP));
+				cell.opcodes.push(Opcode.NEG(cell));
+				cell.opcodes.push(Opcode.SUB(cell, Node.DataLocation.UP));
 			}
 		}
 		{
 			// puzzle1.setTextAt(0, 1, "mov up acc\nnop\nnop\nnop");
 			var cell = puzzle1.getNode(2, 0);
 			if (cell) {
-				cell.instructions = ['MOV DOWN ACC', 'NOP', 'NOP', 'NOP'];
-				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.DOWN, Node.DataLocation.ACC));
-				cell.opcodes.push(Opcode.NOP(cell));
-				cell.opcodes.push(Opcode.NOP(cell));
-				cell.opcodes.push(Opcode.NOP(cell));
+				cell.instructions = ['MOV ACC DOWN', 'ADD 1'];
+				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.ACC, Node.DataLocation.DOWN));
+				cell.opcodes.push(Opcode.ADD(cell, {constant:1}));
 			}
 		}
 
@@ -116,16 +117,20 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 	})
 
 
-	var shouldTick = false;
+	var shouldTick = false,
+		ticksPer = 1;
 	setInterval(function () {
 		if (shouldTick) {
-			the_puzzle.tick();
+			for (var i = 0; i < ticksPer; i++) {
+				the_puzzle.tick();
+			}
 			the_display.update();
 		}
 	}, 100);
 
 	$('#btn_stop').click(function(){
 		shouldTick = false;
+		ticksPer = 1;
 
 		the_puzzle.stop();
 		the_display.update();
@@ -133,6 +138,7 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 
 	$('#btn_step').click(function(){
 		shouldTick = false;
+		ticksPer = 1;
 		
 		the_puzzle.tick();
 		the_display.update();
@@ -140,9 +146,52 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 
 	$('#btn_run').click(function(){
 		shouldTick = true;
+		ticksPer = 1;
 	});
 
 	$('#btn_fast').click(function(){
 		shouldTick = true;
+		ticksPer = 10;
 	});
 });
+
+/**
+ * Tests puzzle iteration speed, not including displaying the puzzle
+ * @param  {Number} iterations (Optional) The number of iterations to run, defaults to 1000
+ * @return {Number}            Number of milliseconds it took to run.
+ */
+function speedTest1(iterations) {
+	iterations = iterations || 1000;
+	
+	the_display.update();
+
+	var start = Date.now();
+	for (var i = 0; i < iterations; i++) {
+		the_puzzle.tick();
+	}
+	var end = Date.now();
+
+	the_display.update();
+
+	console.log('Finished speed test with', iterations, 'iterations, taking ', end-start, 'ms');
+	return end-start;
+}
+
+/**
+ * Tests puzzle iteration speed, including displaying the puzzle
+ * @param  {Number} iterations (Optional) The number of iterations to run, defaults to 1000
+ * @return {Number}            Number of milliseconds it took to run.
+ */
+function speedTest2(iterations) {
+	iterations = iterations || 1000;
+	
+	var start = Date.now();
+	for (var i = 0; i < iterations; i++) {
+		the_puzzle.tick();
+		the_display.update();
+	}
+	var end = Date.now();
+
+	console.log('Finished speed test with', iterations, 'iterations, taking ', end-start, 'ms');
+	return end-start;
+}

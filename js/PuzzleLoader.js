@@ -1,4 +1,4 @@
-define(['Node', 'Computer'], function (Node, Computer) {
+define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, src_random_lua) {
 	var PuzzleLoader = {};
 
 	/**
@@ -15,6 +15,8 @@ define(['Node', 'Computer'], function (Node, Computer) {
 			L.setglobal(key);
 		}
 
+		L.execute(src_random_lua);
+		L.execute('math.random = math_random;math.randomseed=math_randomseed');
 		L.execute('function _G._tablelen(t) return #t end');
 	}
 
@@ -61,7 +63,7 @@ define(['Node', 'Computer'], function (Node, Computer) {
 		var get_description = L.execute("return get_description")[0];
 		var get_streams		= L.execute("return get_streams")[0];
 		var get_layout		= L.execute("return get_layout")[0];
-
+		var get_segment		= L.execute("return get_segment")[0];
 
 		if (typeof(get_name) !== "function")
 			throw new Error('Puzzle does not define a "get_name" function returning a string.');
@@ -71,11 +73,23 @@ define(['Node', 'Computer'], function (Node, Computer) {
 			throw new Error('Puzzle does not declare a "get_streams" function returning an array of {STREAM_INPUT or STREAM_OUTPUT or STREAM_IMAGE, String name, int column, int[] data}.');
 		if (typeof(get_layout) !== "function")
 			throw new Error('Puzzle does not declare a "get_layout" function returning an array of 12 TILE_COMPUTE or TILE_MEMORY or TILE_DAMAGED.');
-		
+
 		var name = get_name() + "",
 			description = [],
 			streams = [],
-			layout = [];
+			layout = [],
+			segment = 0;
+		
+		if (typeof(get_segment) !== "function") {
+			for(var i = 0; i < name.length; i++) {
+				segment += name.charCodeAt(i);
+			}
+		} else {
+			segment = get_segment();
+		}
+		console.log("SEGMENT", segment);
+
+		L.execute('math.randomseed(calculate_seed(' + segment + ', ' + 1 + '));');
 		
 		var t = get_description();
 		for (var i = 1; i <= lua_table_length(L, t); i++) {
@@ -101,8 +115,15 @@ define(['Node', 'Computer'], function (Node, Computer) {
 	};
 
 	PuzzleLoader.loadFromURL = function (url, callback) {
-		$.get(url, function (data) {
-			callback(PuzzleLoader.loadFromString(data));
+		$.ajax({
+			url: url,
+			cache: false,
+			success: function (data) {
+				callback(PuzzleLoader.loadFromString(data));
+			},
+			error: function (jqXHR, status, error) {
+				$('#test_desc').html(url + '<br/>' + status + '<br/>' + error);
+			}
 		});
 	};
 

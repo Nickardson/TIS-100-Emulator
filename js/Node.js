@@ -172,12 +172,8 @@ define([], function () {
 			case Node.DataLocation.DOWN:
 			case Node.DataLocation.LEFT:
 				var dirCel = this.relative(Node.DataLocation.getOrigin(src));
-				if (dirCel && dirCel.data != undefined && dirCel.dest == Node.DataLocation.getOppositeSide(src)) {
-					return true;
-				} else {
-					return false;
-				}
-
+				return dirCel && dirCel.data != undefined && dirCel.dest == Node.DataLocation.getOppositeSide(src);
+			
 			case Node.DataLocation.ANY:
 				for (var i = 0; i < ANY_READ_ORDER.length; i++) {
 					if (this.hasData(ANY_READ_ORDER[i])) {
