@@ -29,13 +29,15 @@
 
 		<div id="computercontainer"></div>
 
+		<div id="cyclecountcontainer">Cycle: <span id="cyclecount">N/A</span></div>
+
 		<noscript>
 			This TIS-100 emulator requires javascript to run.
 		</noscript>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-		<script src="lua.vm.js"></script>
-		<script src="main.js"></script>
-		<script src="logic.js"></script>
+		<script src="js/lua.vm.js"></script>
+		
+		<script src="js/require.js" data-main="js/main.js"></script>
 	</body>
 </html>

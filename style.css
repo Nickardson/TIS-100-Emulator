@@ -19,6 +19,12 @@ body, textarea {
 	text-transform: uppercase;
 }
 
+#cyclecountcontainer {
+	position: fixed;
+	top: 4px;
+	right: 4px;
+}
+
 /* ==================== */
 /* Sidebar              */
 /* ==================== */
@@ -99,6 +105,11 @@ table.datalist tr {
 	border-spacing: 20px;
 }
 
+#computercontainer {
+	width: 80%;
+	float: right;
+}
+
 .cellcontainer {
 	width: 200px;
 	height: 200px;	
@@ -139,14 +150,8 @@ table.datalist tr {
 	border-bottom: 12px solid #cfcfcf;
 }
 
-.cell2 {
-	border: 3px double #cfcfcf;
-}
 .cell2 td {
-	color: black;
-	cursor: default;
-	border: 0;
-	border-left: 3px double #cfcfcf;
+	vertical-align: top;
 }
 
 .stacklist {
@@ -167,10 +172,10 @@ table.datalist tr {
 
 .cell.cell3 td {
 	border: 3px solid #a60d0d;
-	color: black;
 	cursor: default;
 }
-.src.cellstack, .src.cellfail {
+
+.cellstack, .cellfail {
 	color: #cfcfcf;
 	text-align: center;
 	vertical-align: middle;
@@ -178,7 +183,7 @@ table.datalist tr {
 	overflow: hidden;
 }
 
-.src.cellfail {
+.cellfail {
 	color: #a60d0d;
 }
 .cellfail .celltext {
@@ -215,6 +220,7 @@ ul.src>li.active {
 
 /* making a textarea not really a textarea */
 textarea.srcarea {
+	height: 95%;
 	border: none;
 	outline: none;
 	display: block;
