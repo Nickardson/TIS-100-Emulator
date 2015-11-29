@@ -37,9 +37,9 @@ define(['Node'], function (Node) {
 	}
 
 	Computer.prototype.getNode = function(x, y) {
-		try {
+		if (this.nodes[y] != undefined) {
 			return this.nodes[y][x];
-		} catch (ex) {
+		} else {
 			return undefined;
 		}
 	};

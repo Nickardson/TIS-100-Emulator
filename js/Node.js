@@ -208,9 +208,9 @@ define([], function () {
 				throw new Node.ReadError("Cannot address register 'BAK'");
 			case Node.DataLocation.NONE:
 				throw new Node.ReadError("Cannot address register 'NONE'");
+			default:
+				return false;
 		}
-
-		return false;
 	};
 
 	/**
@@ -236,6 +236,9 @@ define([], function () {
 		}
 
 		switch (src) {
+			case Node.DataLocation.NIL: return 0;
+			case Node.DataLocation.ACC: return this.acc;
+			
 			case Node.DataLocation.UP:
 			case Node.DataLocation.RIGHT:
 			case Node.DataLocation.DOWN:
@@ -257,9 +260,6 @@ define([], function () {
 				throw new Node.ReadError("No data available");
 			case Node.DataLocation.LAST:
 				return this.read(this.last);
-			case Node.DataLocation.NIL: return 0;
-			case Node.DataLocation.ACC: return this.acc;
-
 			case DataLocation.BAK:
 				throw new Node.ReadError("Cannot address register 'BAK'");
 			case DataLocation.NONE:

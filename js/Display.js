@@ -10,13 +10,14 @@ define(['Node', 'Computer', 'Opcode'], function (Node, Computer, Opcode) {
 		var firstRow = $('<tr>').appendTo(e);
 
 		if (node.type == Node.Type.TILE_COMPUTE) {
+			// Add both the static instruction list and the editable src element to a cell of the node.
 			var srcContainer = $('<td>')
 				.attr('rowspan', 5)
 				.addClass('srccontainer')
 				.appendTo(firstRow);
-			this.instructionElement = $('<ul class="src" style="display:none">').appendTo(srcContainer);
-			this.srcElement = $('<textarea></textarea>')
-				.addClass('src srcarea')
+			
+			this.instructionElement = $('<ul>').addClass('src').css('display', 'none').appendTo(srcContainer);
+			this.srcElement = $('<textarea>').addClass('src srcarea')
 				.attr({
 					'id': 'src_' + node.x + '_' + node.y,
 
@@ -27,7 +28,9 @@ define(['Node', 'Computer', 'Opcode'], function (Node, Computer, Opcode) {
 				})
 				.val(node.instructions.join('\n'))
 				.appendTo(srcContainer);
-			this.accElement = $('<td style="position:relative">ACC<br/><span></span></td>').appendTo(firstRow).find('span'); // acc is added to the first row, since the content has rowspan of 5.
+
+			// Add side info
+			this.accElement = $('<td>ACC<br/><span></span></td>').appendTo(firstRow).find('span'); // acc is added to the first row, since the content has rowspan of 5.
 			this.bakElement = $('<tr><td>BAK<br/><span>(0)</span></td></tr>').appendTo(e).find('span');
 			this.lastElement = $('<tr><td>LAST<br/><span>N/A</span></td></tr>').appendTo(e).find('span');
 			this.modeElement = $('<tr><td>MODE<br/><span>IDLE</span></td></tr>').appendTo(e).find('span');
@@ -38,8 +41,9 @@ define(['Node', 'Computer', 'Opcode'], function (Node, Computer, Opcode) {
 				.addClass('srccontainer')
 				.appendTo(firstRow);
 			$('<td>').appendTo(firstRow);
-			$('<div></div>').appendTo(srcContainer).addClass('cellfail').html('<div class="celltext">COMMUNICATION FAILURE</div>');
+			$('<div>').appendTo(srcContainer).addClass('cellfail').append('<div class="celltext">COMMUNICATION FAILURE</div>');
 
+			// Add empty cells on the right
 			for (var i = 0; i < 3; i++) {
 				$('<tr><td></td></tr>').appendTo(e);
 			}

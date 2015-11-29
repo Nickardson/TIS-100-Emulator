@@ -1,24 +1,16 @@
-/* http://www.fixedsysexcelsior.com/ */
-/*@font-face {
-	font-family: "FSEX300";
-	src: url('FSEX300.ttf');
-}*/
-
 body, textarea {
-	/* not using FixedSysExcelsior because of subpixel rendering
-	font-family: "FSEX300", monospace;
-	font-smooth: never;
-	-webkit-font-smoothing : none;
-	*/
 	background-color: black;
 	color: #cfcfcf;
 	font-family: "Consolas", "Courier New", monospace;
-	font-size: 14px;
-	line-height: 14px;
+	font-size: 12px;
+	line-height: 12px;
 	font-weight: bold;
 	text-transform: uppercase;
 }
 
+/* ==================== */
+/* Cycle Counter        */
+/* ==================== */
 #cyclecountcontainer {
 	position: fixed;
 	top: 4px;
@@ -59,6 +51,8 @@ body, textarea {
 .infobox {
 	padding: 10px;
 	margin: 10px;
+	white-space: pre-line;
+	border: 3px double #cfcfcf;
 }
 
 #inputoutput {
@@ -102,7 +96,7 @@ table.datalist tr {
 /* Computer             */
 /* ==================== */
 .computer {
-	border-spacing: 20px;
+	border-spacing: 10px;
 }
 
 #computercontainer {
@@ -115,8 +109,13 @@ table.datalist tr {
 	height: 200px;	
 }
 
+/* Hide un-needed elements on smaller screens */
 @media (max-width: 900px) {
-	.src.cellfail .celltext {
+	div.cellfail div.celltext {
+		display: none;
+	}
+
+	.arrow {
 		display: none;
 	}
 }
@@ -133,11 +132,7 @@ table.datalist tr {
 	color: #cfcfcf;
 }
 
-.box {
-	white-space: pre-line;
-}
-
-.cell td, .box {
+.cell td {
 	border: 3px double #cfcfcf;
 }
 
@@ -217,10 +212,10 @@ td.srccontainer {
 	overflow: auto;
 }
 
+/* Instructions */
 ul.src {
 	list-style-type: none;
 }
-
 ul.src>li {
 	width: 100%;
 	white-space: pre;
@@ -239,6 +234,7 @@ textarea.srcarea {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
+	background-color: black;
 	background-color: transparent;
 	resize: none;
 	outline: none;
@@ -247,4 +243,13 @@ textarea.srcarea {
 .arrow {
 	text-align: center;
 	font-size: 2em;
+}
+
+::selection {
+  background: white;
+  color: black;
+}
+::-moz-selection {
+  background: white;
+  color: black;
 }

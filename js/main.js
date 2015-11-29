@@ -111,6 +111,21 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 		shouldTick = true;
 		ticksPer = 1234; // TODO: makes the cycle count look fancy, but should this be a rounder number?
 	});
+
+	$('#btn_exactticks').click(function(){
+		var count = parseInt(prompt("Number of cycles to advance:"));
+
+		if (!isNaN(count) && typeof count == "number") {
+			the_display.setEditable(false);
+			shouldTick = false;
+			ticksPer = false;
+
+			for (var i = 0; i < count; i++) {
+				the_puzzle.tick();
+			}
+			the_display.update();
+		}
+	});
 });
 
 /**
