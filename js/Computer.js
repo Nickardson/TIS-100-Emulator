@@ -22,9 +22,6 @@ define(['Node'], function (Node) {
 		this.columnsIn = [];
 		this.columnsOut = [];
 
-		// TODO: replace with code in Display.js
-		this.streamsOutput=[];
-		
 		/**
 		 * 2d array, cells[y][x], 0-based
 		 * @type {Node[][]}
@@ -39,27 +36,20 @@ define(['Node'], function (Node) {
 		}
 	}
 
-	Computer.prototype.getNode = function(x, y) {return this.nodes[y][x];};
-	Computer.prototype.setNode = function(x, y, node) {this.nodes[y][x] = node;};
-
-	/**
-	 * Sets the output value for display
-	 * @param {Number} column   The index of the column
-	 * @param {Number} outindex The index of the output, ie 3 being the fourth output
-	 * @param {Number} value    The value to set the output to
-	 */
-	Computer.prototype.setOutput = function(column, outindex, value) {
-		// Computer may be not displayed
-		if (this.streamsOutput[column] != undefined) {
-			var e = this.streamsOutput[column][outindex];
-			e.html(value);
-
-			if (value != this.columnsOut[column][3][outindex]) {
-				e.addClass('outputwrong');
-			} else {
-				e.removeClass('outputwrong');
-			}
+	Computer.prototype.getNode = function(x, y) {
+		try {
+			return this.nodes[y][x];
+		} catch (ex) {
+			return undefined;
 		}
+	};
+
+	Computer.prototype.setNode = function(x, y, node) {
+		if (this.nodes[y] == undefined) {
+			this.nodes[y] = [];
+		}
+
+		this.nodes[y][x] = node;
 	};
 
 	/**
@@ -77,7 +67,11 @@ define(['Node'], function (Node) {
 	Computer.prototype.tick = function() {
 		// first tick, sets up the codes.
 		if (this.cycle === 0) {
-			this.eachNode(function (n) {n.currentop = 0;});
+			this.eachNode(function (n) {
+				if (n.opcodes.length != 0) {
+					n.currentop = 0;
+				}
+			});
 		} else {
 			for (var i = 0; i < 2; i++) {
 				this.eachNode(function (n) {n.tick();});

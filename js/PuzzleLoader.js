@@ -1,4 +1,4 @@
-define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, src_random_lua) {
+define(['Node', 'Computer', 'Opcode', 'text!lua/random.lua'], function (Node, Computer, Opcode, src_random_lua) {
 	var PuzzleLoader = {};
 
 	/**
@@ -7,6 +7,11 @@ define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, sr
 	 */
 	function prepareLuaPuzzleState (L) {
 		for (var key in Node.Type) {
+			// skip internal node types
+			if (key.startsWith('_')) {
+				continue;
+			}
+
 			L.pushnumber(Node.Type[key]);
 			L.setglobal(key);
 		}
@@ -64,7 +69,8 @@ define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, sr
 		var get_streams		= L.execute("return get_streams")[0];
 		var get_layout		= L.execute("return get_layout")[0];
 		var get_segment		= L.execute("return get_segment")[0];
-
+		var get_initial		= L.execute("return get_initial")[0];
+		
 		if (typeof(get_name) !== "function")
 			throw new Error('Puzzle does not define a "get_name" function returning a string.');
 		if (typeof(get_description) !== "function")
@@ -87,7 +93,6 @@ define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, sr
 		} else {
 			segment = get_segment();
 		}
-		console.log("SEGMENT", segment);
 
 		L.execute('math.randomseed(calculate_seed(' + segment + ', ' + 1 + '));');
 		
@@ -111,6 +116,18 @@ define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, sr
 
 		var puzzle = new Computer(name, description, streams, layout);
 		puzzle.lua = L;
+
+		if (typeof(get_initial) === "function") {
+			var initialContents = L.execute('return table.unpack(get_initial())')
+			for (var i = 0; i < 12; i++) {
+				var node = puzzle.nodes[Math.floor(i / 4)][i % 4],
+					instructions = lua_table_to_array(L, initialContents[i]);
+
+				node.instructions = instructions;
+				Opcode.parse(node, instructions);
+			}
+		}
+
 		return puzzle;
 	};
 
@@ -126,6 +143,40 @@ define(['Node', 'Computer', 'text!lua/random.lua'], function (Node, Computer, sr
 			}
 		});
 	};
+
+	/**
+	 * Tests the given puzzle using its defined get_test_cycles and get_test_result functions.
+	 * @param  {Computer} puzzle The puzzle.
+	 * @return {Boolean}        If get_test_result is defined in the puzzle's script, whether it returned true, or true when the puzzle is done ticking.
+	 */
+	PuzzleLoader.test = function(puzzle) {
+		var L = puzzle.lua;
+
+		var get_test_cycles	= L.execute("return get_test_cycles")[0];
+		var get_test_result	= L.execute("return get_test_result")[0];
+		
+		if (get_test_cycles != undefined) {
+			var cycles = get_test_cycles() + 1;
+
+			for (var i = 0; i < cycles; i++) {
+				puzzle.tick();
+			}
+
+			if (get_test_result != undefined) {
+				L.getglobal("get_test_result");
+				L.push(puzzle);
+				L.pcall(1, 1, 0);
+				var good = L.toboolean(-1) == 1;
+				L.pop(1);
+				
+				return good;
+			} else {
+				return true;
+			}
+		} else {
+			throw new Error('No "get_test_cycles" function defined in puzzle.');
+		}
+	}
 
 	return PuzzleLoader;
 });

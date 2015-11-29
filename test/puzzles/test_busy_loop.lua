@@ -1,0 +1,30 @@
+function get_name()
+	return "TEST-BUSY-LOOP"
+end
+
+function get_description()
+	return {
+		"A 9.9*10^29 CYCLE BUSY-LOOP",
+		"CREDIT TO \"revv\""
+	}
+end
+
+function get_streams()
+	return {}
+end
+
+function get_layout() 
+	return {
+		TILE_COMPUTE,	TILE_DAMAGED,	TILE_COMPUTE,	TILE_COMPUTE,
+		TILE_COMPUTE,	TILE_DAMAGED,	TILE_COMPUTE,	TILE_DAMAGED,
+		TILE_COMPUTE,	TILE_DAMAGED,	TILE_COMPUTE,	TILE_COMPUTE
+	}
+end
+
+function get_initial()
+	return {
+		{"MOV ANY DOWN"}, {}, {"MOV DOWN NIL", "MOV 999 ACC", "LOOP: SWP", "MOV 999 ACC", "SUB: NOP", "MOV -11 RIGHT", "SUB RIGHT", "JGZ SUB", "SWP", "SUB 1", "JGZ LOOP", "MOV 1 DOWN", "STOP: JRO DOWN", "MOV ANY ANY", "JMP STOP"}, {"MOV LEFT NIL", "MOV 999 ACC", "LOOP: SWP", "MOV 999 ACC", "LOOP2: NOP", "NOP", "SUB 1", "JGZ LOOP2", "SWP", "SUB 1", "JGZ LOOP", "MOV 1 LEFT", "STOP: JRO LEFT", "MOV UP LEFT", "JMP STOP"},
+		{"MOV ANY DOWN"}, {}, {"MOV DOWN NIL", "S:MOV 999 ACC", "LOOP: SWP", "MOV 999 ACC", "SUB: MOV -10 UP", "SUB UP", "JGZ SUB", "SWP", "SUB 1", "JGZ LOOP", "MOV 1 DOWN", "STOP: JRO DOWN", "MOV ANY ANY", "MOV ANY ANY", "JMP STOP"}, {},
+		{"MOV ANY DOWN"}, {}, {"MOV RIGHT NIL", "MOV 999 ACC", "LOOP: SWP", "MOV 999 ACC", "SUB: MOV -10 UP", "SUB UP", "JGZ SUB", "SWP", "SUB 1", "JGZ LOOP", "MOV 1 RIGHT", "STOP: JRO RIGHT", "MOV ANY ANY", "MOV ANY ANY", "JMP STOP"}, {"MOV 999 ACC", "LOOP: SWP", "MOV 999 ACC", "SUB: NOP", "MOV -10 LEFT", "SUB LEFT", "JGZ SUB", "SWP", "SUB 1", "JGZ LOOP", "MOV 8 ACC", "IN.A: MOV 1 LEFT", "SUB 1", "JNZ IN.A", "MOV LEFT DOWN"}
+	}
+end

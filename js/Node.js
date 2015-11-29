@@ -38,6 +38,18 @@ define([], function () {
 		this.opcodes = [];
 
 		/**
+		 * A map of label names->opcode indices
+		 * @type {Map{name->index}}
+		 */
+		this.labels = {};
+
+		/**
+		 * A map which relates the index of an opcode to the instruction line
+		 * @type {Map{opcode index->instruction index}}
+		 */
+		this.opcodeLines = {};
+
+		/**
 		 * If Node is a TILE_MEMORY, used as a FILO stack of numbers.
 		 */
 		this.stack = [];
@@ -142,18 +154,19 @@ define([], function () {
 		this.setBAK(bak);
 	};
 
+	/**
+	 * Gets the node relative to this node, in the given direction.
+	 * @param  {Integer|[x,y]} x Either an array of [x,y] or the x coordinate.
+	 * @param  {Integer} y (Optional) If the x is not an an array of 2 coordinates, the y coordinate
+	 * @return {Node}   The node, or undefined if no node is in that direction.
+	 */
 	Node.prototype.relative = function(x, y) {
 		if (typeof(x) == "object") {
 			y = x[1];
 			x = x[0];
 		}
 
-		var rx = this.x + x;
-		var ry = this.y + y;
-
-		if (rx >= 0 && ry >= 0 && rx < this.computer.width && ry < this.computer.height) {
-			return this.computer.getNode(rx, ry);
-		}
+		return this.computer.getNode(this.x + x, this.y + y);
 	};
 
 	/**
@@ -254,6 +267,29 @@ define([], function () {
 		}
 	};
 
+	/**
+	 * Jumps to the instruction represented by the label with the given name.
+	 * @param  {String} label The name of the label to jump to.
+	 * @return {Boolean}       Whether the jump succeeded.
+	 */
+	Node.prototype.jumpTo = function (label) {
+		var op = this.labels[label];
+		if (op == undefined) {
+			throw new Error("Label " + label + " is not defined");
+		}
+
+		this.doneTick = true;
+		this.currentop = op - 1;
+		this.stalled = 0;
+
+		return true;
+	}
+
+	/**
+	 * Performs a step of the opcodes in this node.
+	 * @param  {Integer} t The stalled iteration of the nodes.
+	 * @return {Boolean}   Whether the opcode completed its task.
+	 */
 	Node.prototype.step = function (t) {
 		if (this.opcodes.length == 0) {
 			return true;
@@ -276,19 +312,31 @@ define([], function () {
 		return success;
 	}
 
+	/**
+	 * Performs a partial tick on the node.
+	 * If the instruction was completed, will not tick again until 'post' is called.
+	 * If not, the tick will be attempted again, ie to resolve any order-based dependencies
+	 */
 	Node.prototype.tick = function() {
 		if (!this.doneTick) {
 			this.doneTick = this.step(this.stalled++);
 		}
 	};
 
+	/**
+	 * Post operations, to be called after all other nodes are done having their 'tick' called.
+	 */
 	Node.prototype.post = function() {
 		this.doneTick = false;
 		
-		this.data = this.queuedData;
-		this.queuedData = undefined;
-		this.dest = this.queuedDest;
-		this.queuedDest = Node.DataLocation.NONE;
+		if (this.queuedData != undefined) {
+			this.data = this.queuedData;
+			this.queuedData = undefined;
+		}
+		if (this.queuedDest != Node.DataLocation.NONE) {
+			this.dest = this.queuedDest;
+			this.queuedDest = Node.DataLocation.NONE;
+		}
 		
 		if (this.opcodes.length == 0 || this.lastop == undefined) {
 			return;
@@ -297,6 +345,10 @@ define([], function () {
 		this.opcodes[this.lastop].post(this.stalled-1);
 	};
 
+	/**
+	 * For a Stack Memory node, pushes a number onto the stack.
+	 * @return {Boolean} Whether the value was pushed onto the stack.
+	 */
 	Node.prototype.pushStack = function(val) {
 		if (this.stack.length <= Node.STACK_SIZE - 1) {
 			this.stack.push(val);
@@ -306,6 +358,10 @@ define([], function () {
 		}
 	};
 
+	/**
+	 * For a Stack Memory node, pops a number off the stack.
+	 * @return {Number|False} The popped value if available, or 'false' if not.
+	 */
 	Node.prototype.popStack = function() {
 		if (this.stack.length > 0) {
 			return stack.pop();
@@ -314,8 +370,11 @@ define([], function () {
 		}
 	};
 
+	/**
+	 * Resets this node to its state before the 'run' button is clicked.
+	 * Does not reset instructions or opcodes.
+	 */
 	Node.prototype.reset = function() {
-		// TODO: ensure state is fully reset
 		this.stack = [];
 		this.currentop = -1;
 		this.stalled = 0;
@@ -341,7 +400,9 @@ define([], function () {
 	Node.Type = {
 		TILE_COMPUTE: 1,
 		TILE_MEMORY: 2,
-		TILE_DAMAGED: 3
+		TILE_DAMAGED: 3,
+		_TILE_STREAM_PROVIDER: 98,
+		_TILE_STREAM_CONSUMER: 99,
 	};
 
 	/**
@@ -358,7 +419,23 @@ define([], function () {
 		LAST: 6,
 		NIL: 7,
 		ACC: 8,
-		BAK: 9,
+
+		/**
+		 * Gets whether the location is always instantly readable, for example the ACC.
+		 * @param  {DataLocation}  src The direction to check.
+		 * @return {Boolean}     Whether the location is instantly readable.
+		 */
+		isInstant: function (src) {
+			switch (Node.DataLocation.getName(src)) {
+				case "NONE":
+				case "NIL":
+				case "ACC":
+				case "CONSTANT":
+					return true;
+				default:
+					return false;
+			}
+		},
 
 		/**
 		 * If the given DataLocation is one of up,right,down,left, returns the opposite side. undefined behavior for others.
@@ -382,6 +459,7 @@ define([], function () {
 			if (src == Node.DataLocation.RIGHT) {return [1, 0];}
 			if (src == Node.DataLocation.DOWN) {return [0, 1];}
 			if (src == Node.DataLocation.LEFT) {return [-1, 0];}
+			// TODO: should this return the direction of the 'ANY'?
 			return [0,0];
 		},
 
@@ -396,6 +474,35 @@ define([], function () {
 						return prop;
 				}
 			}
+		},
+
+		/**
+		 * Gets a string representation of the given DataLocation.
+		 * @param  {DataLocation} value The location or constant to create a string from.
+		 * @return {String}       The string representation of the location.
+		 */
+		getString: function (value) {
+			var s = Node.DataLocation.getName(value);
+			if (s == "CONSTANT") {
+				return value.constant + "";
+			} else {
+				return s;
+			}
+		},
+
+		/**
+		 * Gets a datalocation from a name or number string.
+		 * @param  {String} str The text which represents the DataLocation
+		 * @return {DataLocation}     The data location
+		 * @throws {Error} If the given string is not a numerical string or the name of a datalocation
+		 */
+		fromName: function (str) {
+			if (typeof Node.DataLocation[str] == 'number') {
+				return Node.DataLocation[str];
+			} else if (!isNaN(parseInt(str))) {
+				return {constant: parseInt(str)};
+			}
+			throw new Error('Invalid Data Location');
 		}
 	};
 

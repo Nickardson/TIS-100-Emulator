@@ -50,39 +50,58 @@ define(['Node', 'Computer'], function (Node, Computer) {
 		}
 
 		this.update();
+		this.setEditable(false);
+	};
+
+	Display.NodeDisplay.prototype.setEditable = function(editable) {
+		if (this.node.type == Node.Type.TILE_COMPUTE) {
+			// TODO: use inherit instead of block?
+			this.srcElement.css('display', editable ? 'block' : 'none');
+			this.instructionElement.css('display', editable ? 'none' : 'block');
+			
+			if (this.editable !== editable) {
+				if (editable) {
+
+				} else {
+					this.instructionElement.empty();
+					this.cachedInstructions = [];
+
+					// it ain't a premature optimization if it gives a 4-5x speed increase.
+					for (var i = 0; i < this.node.instructions.length; i++) {
+						var ins = this.node.instructions[i].toString();
+						if (ins.length == 0) {
+							ins = "&nbsp;";
+						}
+						this.cachedInstructions[i] = $('<li>' + ins + '</li>').appendTo(this.instructionElement);
+					}
+				}
+			}
+		}
+		
+		this.editable = editable;
 	};
 
 	Display.NodeDisplay.prototype.update = function() {
 		if (this.node.type == Node.Type.TILE_COMPUTE) {
 			this.accElement.text(this.node.acc);
 			this.bakElement.text('(' + this.node.bak + ')');
-			
-			if (this.srcElement.css('display') != 'none') {
-				// TODO: this caching saves lots of cpu time, but can it be futher improved?
-				this.srcElement.css('display', 'none');
-				this.instructionElement.css('display', 'block');
-				this.instructionElement.empty();
-				this.cachedInstructions = [];
 
-				// it ain't a premature optimization if it gives a 4-5x speed increase.
-				for (var i = 0; i < this.node.instructions.length; i++) {
-					this.cachedInstructions[i] = $('<li>' + this.node.instructions[i].toString() + '</li>').appendTo(this.instructionElement);
-				}
-			}
+			// the line of the instruction matching the current opcode.
+			var currentInstruction = this.node.opcodeLines[this.node.currentop];
 
-			if (!this.cachedCurrentop || this.cachedCurrentop != this.node.currentop) {
-				this.cachedCurrentop = this.node.currentop;
+			if (!this.cachedCurrentop || this.cachedCurrentop != currentInstruction) {
+				this.cachedCurrentop = currentInstruction;
 
 				if (this.cachedActiveInstruction)
 					this.cachedActiveInstruction.removeClass('active');
 				else
 					this.instructionElement.find('.active').removeClass('active');
 				
-				if (this.node.currentop >= 0 && this.node.instructions.length > 0) {
+				if (currentInstruction >= 0 && this.node.instructions.length > 0) {
 					if (this.cachedInstructions)
-						this.cachedActiveInstruction = this.cachedInstructions[this.node.currentop].addClass('active');
+						this.cachedActiveInstruction = this.cachedInstructions[currentInstruction].addClass('active');
 					else // fallback, shouldn't be needed.
-						this.cachedActiveInstruction = this.instructionElement.find(':nth-child(' + (this.node.currentop + 1) + ')').addClass('active');
+						this.cachedActiveInstruction = this.instructionElement.find(':nth-child(' + (currentInstruction + 1) + ')').addClass('active');
 				}
 			}
 		} else if (this.node.type == Node.Type.TILE_MEMORY) {
@@ -101,6 +120,9 @@ define(['Node', 'Computer'], function (Node, Computer) {
 		var io_titles = $('#io_titles').empty();
 		var io_data = $('#io_data').empty();
 
+		// TODO: replace with code in Display.js
+		this.streamsOutput=[];
+
 		for (var i = 0; i < puzzle.streams.length; i++) {
 			var stream = puzzle.streams[i];
 
@@ -108,7 +130,7 @@ define(['Node', 'Computer'], function (Node, Computer) {
 				puzzle.columnsIn[stream[2]] = stream;
 			} else if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
 				puzzle.columnsOut[stream[2]] = stream;
-				puzzle.streamsOutput[stream[2]] = [];
+				this.streamsOutput[stream[2]] = [];
 			}
 
 			$('<td>').text(stream[1]).appendTo(io_titles);
@@ -122,7 +144,7 @@ define(['Node', 'Computer'], function (Node, Computer) {
 					$('<td>').html(stream[3][j]).appendTo(row);
 				}
 				if (stream[0] == Computer.StreamType.STREAM_OUTPUT) {
-					puzzle.streamsOutput[stream[2]][j] = $('<td>').appendTo(row);
+					this.streamsOutput[stream[2]][j] = $('<td>').appendTo(row);
 					table.addClass('table2row');
 				}
 			}
@@ -178,8 +200,23 @@ define(['Node', 'Computer'], function (Node, Computer) {
 
 				cells[y][x] = cell;
 			}
-		}
 
+		}
+		/*
+		var streamTop = $('<tr>').addClass('stream-head').prependTo(computer),
+			streamBottom = $('<tr>').addClass('stream-head').appendTo(computer);
+
+		streamTop.append('<td>IN.X &darr;</td><td></td>');
+		streamTop.append('<td></td><td></td>');
+		streamTop.append('<td></td><td></td>');
+		streamTop.append('<td>IN.A &darr;</td>');
+
+		streamBottom.append('<td>OUT.X &darr;</td><td></td>');
+		streamBottom.append('<td></td><td></td>');
+		streamBottom.append('<td></td><td></td>');
+		streamBottom.append('<td>OUT.A &darr;</td>');
+		*/
+		
 		this.update = function () {
 			for (var y = 0; y < puzzle.height; y++) {
 				for (var x = 0; x < puzzle.width; x++) {
@@ -188,6 +225,35 @@ define(['Node', 'Computer'], function (Node, Computer) {
 			}
 
 			$('#cyclecount').text((puzzle.cycle==0)?'N/A':puzzle.cycle - 1);
+		}
+
+
+		/**
+		 * Sets the output value for display
+		 * @param {Number} column   The index of the column
+		 * @param {Number} outindex The index of the output, ie 3 being the fourth output
+		 * @param {Number} value    The value to set the output to
+		 */
+		this.setOutput = function(column, outindex, value) {
+			// Computer may be not displayed
+			if (this.streamsOutput[column] != undefined) {
+				var e = this.streamsOutput[column][outindex];
+				e.html(value);
+
+				if (value != puzzle.columnsOut[column][3][outindex]) {
+					e.addClass('outputwrong');
+				} else {
+					e.removeClass('outputwrong');
+				}
+			}
+		};
+
+		this.setEditable = function(editable) {
+			for (var y = 0; y < puzzle.height; y++) {
+				for (var x = 0; x < puzzle.width; x++) {
+					cells[y][x].setEditable(editable);
+				}
+			}
 		}
 	};
 

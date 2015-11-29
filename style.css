@@ -126,6 +126,11 @@ table.datalist tr {
 	width: 100%;
 	position: relative;
 	border-collapse: collapse;
+	color: #999;
+}
+
+.cell tr td span {
+	color: #cfcfcf;
 }
 
 .box {
@@ -134,6 +139,11 @@ table.datalist tr {
 
 .cell td, .box {
 	border: 3px double #cfcfcf;
+}
+
+/* stream headers */
+.stream-head {
+	text-align: center;
 }
 
 /* cell td and td.srccontainer width should add to 100% */
@@ -195,6 +205,7 @@ td.srccontainer {
 	height: 100%;
 	text-align: left;
 	vertical-align: top;
+	color: #cfcfcf;
 }
 
 .src {

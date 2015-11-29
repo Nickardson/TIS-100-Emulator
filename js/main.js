@@ -3,7 +3,8 @@ requirejs.config({
 
     paths: {
     	lua: '../lua',
-    	puzzles: '../puzzles'
+    	puzzles: '../puzzles',
+    	text: 'lib/text'
     }
 });
 
@@ -51,72 +52,19 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 		}
 	});
 
-
-	PuzzleLoader.loadFromURL('puzzles/01_diagnostic.lua', function (puzzle1) {
+	PuzzleLoader.loadFromURL('test/puzzles/test_busy_loop.lua', function (puzzle1) {
 		the_puzzle = puzzle1;
-
-		{
-			// puzzle1.setTextAt(0, 0, "add 112\nsub 11\nmov acc down");
-			var cell = puzzle1.getNode(0, 0);
-			if (cell) {
-				cell.instructions = ['ADD 112', 'ADD -11', 'MOV ACC DOWN'];
-				cell.opcodes.push(Opcode.ADD(cell, {constant: 112}));
-				cell.opcodes.push(Opcode.ADD(cell, {constant: -11}));
-				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.ACC, Node.DataLocation.DOWN));
-			}
-		}
-		{
-			// puzzle1.setTextAt(0, 1, "mov up acc\nnop\nnop\nnop");
-			var cell = puzzle1.getNode(0, 1);
-			if (cell) {
-				cell.instructions = ['MOV UP ACC', 'NOP', 'NOP', 'NOP'];
-				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.UP, Node.DataLocation.ACC));
-				cell.opcodes.push(Opcode.NOP(cell));
-				cell.opcodes.push(Opcode.NOP(cell));
-				cell.opcodes.push(Opcode.NOP(cell));
-			}
-		}
-
-		{
-			// puzzle1.setTextAt(0, 0, "add 112\nsub 11\nmov acc down");
-			var cell = puzzle1.getNode(2, 1);
-			if (cell) {
-				cell.instructions = ['ADD UP', 'neg', 'SUB UP'];
-				cell.opcodes.push(Opcode.ADD(cell, Node.DataLocation.UP));
-				cell.opcodes.push(Opcode.NEG(cell));
-				cell.opcodes.push(Opcode.SUB(cell, Node.DataLocation.UP));
-			}
-		}
-		{
-			// puzzle1.setTextAt(0, 1, "mov up acc\nnop\nnop\nnop");
-			var cell = puzzle1.getNode(2, 0);
-			if (cell) {
-				cell.instructions = ['MOV ACC DOWN', 'ADD 1'];
-				cell.opcodes.push(Opcode.MOV(cell, Node.DataLocation.ACC, Node.DataLocation.DOWN));
-				cell.opcodes.push(Opcode.ADD(cell, {constant:1}));
-			}
-		}
-
-		{
-			// puzzle1.setTextAt(0, 1, "mov up acc\nnop\nnop\nnop");
-			var cell = puzzle1.getNode(0, 2);
-			if (cell) {
-				cell.instructions = ['Add 1', 'ADD ACC'];
-				cell.opcodes.push(Opcode.ADD(cell, {constant: 1}));
-				cell.opcodes.push(Opcode.ADD(cell, Node.DataLocation.ACC));
-			}
-		}
 		
 		puzzle1.start();
 		
-		puzzle1.setOutput(0, 0, 1);
-
 		the_display = new Display.ComputerDisplay(puzzle1);
-
-
+		for (var i = 0; i < 39; i++) {
+			the_display.setOutput(0, i, 10+Math.floor(Math.random()*10));
+		}
 	})
 
-
+	// Run: 50 ops per second
+	// Fast: 5000? ops per second
 	var shouldTick = false,
 		ticksPer = 1;
 	setInterval(function () {
@@ -126,7 +74,7 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 			}
 			the_display.update();
 		}
-	}, 100);
+	}, 1000 / 30);
 
 	$('#btn_stop').click(function(){
 		shouldTick = false;
@@ -151,7 +99,12 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 
 	$('#btn_fast').click(function(){
 		shouldTick = true;
-		ticksPer = 10;
+		ticksPer = 150;
+	});
+
+	$('#btn_ultrafast').click(function(){
+		shouldTick = true;
+		ticksPer = 1234; // TODO: makes the cycle count look fancy, but should this be a rounder number?
 	});
 });
 
