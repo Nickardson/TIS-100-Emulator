@@ -223,6 +223,7 @@ ul.src {
 
 ul.src>li {
 	width: 100%;
+	white-space: pre;
 }
 ul.src>li.active {
 	background-color: #9a9a9a;

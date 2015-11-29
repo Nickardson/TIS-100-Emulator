@@ -52,15 +52,16 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 		}
 	});
 
-	PuzzleLoader.loadFromURL('test/puzzles/test_busy_loop.lua', function (puzzle1) {
+	PuzzleLoader.loadFromURL('puzzles/00_initial.lua', function (puzzle1) {
 		the_puzzle = puzzle1;
 		
 		puzzle1.start();
 		
 		the_display = new Display.ComputerDisplay(puzzle1);
-		for (var i = 0; i < 39; i++) {
+		the_display.setEditable(true);
+		/*for (var i = 0; i < 39; i++) {
 			the_display.setOutput(0, i, 10+Math.floor(Math.random()*10));
-		}
+		}*/
 	})
 
 	// Run: 50 ops per second
@@ -77,6 +78,7 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 	}, 1000 / 30);
 
 	$('#btn_stop').click(function(){
+		the_display.setEditable(true);
 		shouldTick = false;
 		ticksPer = 1;
 
@@ -85,24 +87,27 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 	});
 
 	$('#btn_step').click(function(){
+		the_display.setEditable(false);
 		shouldTick = false;
 		ticksPer = 1;
-		
 		the_puzzle.tick();
 		the_display.update();
 	});
 
 	$('#btn_run').click(function(){
+		the_display.setEditable(false);
 		shouldTick = true;
 		ticksPer = 1;
 	});
 
 	$('#btn_fast').click(function(){
+		the_display.setEditable(false);
 		shouldTick = true;
 		ticksPer = 150;
 	});
 
 	$('#btn_ultrafast').click(function(){
+		the_display.setEditable(false);
 		shouldTick = true;
 		ticksPer = 1234; // TODO: makes the cycle count look fancy, but should this be a rounder number?
 	});

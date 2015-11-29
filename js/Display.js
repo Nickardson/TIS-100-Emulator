@@ -1,4 +1,4 @@
-define(['Node', 'Computer'], function (Node, Computer) {
+define(['Node', 'Computer', 'Opcode'], function (Node, Computer, Opcode) {
 	var Display = {};
 
 	Display.NodeDisplay = function (node) {
@@ -63,6 +63,10 @@ define(['Node', 'Computer'], function (Node, Computer) {
 				if (editable) {
 
 				} else {
+					this.node.opcodes = [];
+					this.node.instructions = this.srcElement.val().split('\n');
+					Opcode.parse(this.node, this.node.instructions);
+
 					this.instructionElement.empty();
 					this.cachedInstructions = [];
 

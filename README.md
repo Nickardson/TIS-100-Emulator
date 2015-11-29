@@ -7,8 +7,8 @@ http://store.steampowered.com/app/370360/
 
 ### Goals
 * <s>Support loading .lua puzzles</s>
-* Emulate instructions
-* Show current instruction for each node
+* <s>Emulate instructions</s>
+* <s>Show current instruction for each node</s>
 * Show queued data movements with arrows
 * Emulate stack memory nodes
 * Emulate graphical view
