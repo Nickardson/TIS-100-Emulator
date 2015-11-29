@@ -142,11 +142,11 @@ define([], function () {
 	};
 
 	Node.prototype.setACC = function(acc) {
-		this.acc = Math.max(-999, Math.min(acc, 999));
+		this.acc = Math.floor(Math.max(-999, Math.min(acc, 999)));
 	};
 
 	Node.prototype.setBAK = function(bak) {
-		this.bak = Math.max(-999, Math.min(bak, 999));
+		this.bak = Math.floor(Math.max(-999, Math.min(bak, 999)));
 	};
 
 	Node.prototype.setACCandBAK = function(acc, bak) {

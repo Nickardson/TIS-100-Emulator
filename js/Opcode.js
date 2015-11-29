@@ -176,6 +176,26 @@ define(['Node'], function (Node) {
 		});
 	};
 
+	Opcode.HCF = function (node) {
+		return new Opcode(node, function (t) {
+			node.computer.eachNode(function (n) {
+				if (n != node) {
+					n.setACCandBAK(Math.random() * 1999 - 999, Math.random() * 1999 - 999);
+					n.currentop = Math.floor(Math.random() * n.opcodes.length);
+				}
+			});
+
+			if (Math.random() < 0.01) {
+				var n = $('#test_desc').text(),
+					i = Math.floor(Math.random() * n.length);
+
+				$('#test_desc').html(n.substring(0, i) + String.fromCharCode(0x00C0 + Math.random() * (0x0270-0x00C0+1)) + n.substring(i+1));
+			}
+
+			return false;
+		});
+	};
+
 	Opcode._PROVIDE = function (node) {
 		return new Opcode(node, function () {
 			// TODO: implement
@@ -292,6 +312,8 @@ define(['Node'], function (Node) {
 				checkOperandCount(tokens, 1);
 				o = Opcode.JRO(cell,
 					Node.DataLocation.fromName(tokens[1]));
+			} else if (tokens[0] == 'HCF') {
+				o = Opcode.HCF(cell);
 			} else if (tokens.length > 0) {
 				throw new Error('INVALID OPCODE "' + tokens[0] + '"');
 			}
