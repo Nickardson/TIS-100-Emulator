@@ -1,7 +1,7 @@
-# TIS-100-Web
+# TIS-100 Web Emulator
 An emulator for the computer in TIS-100, a Zachtronics game.
 
-http://nickardson.github.io/TIS-100-Web/
+http://nickardson.github.io/TIS-100-Emulator
 
 http://store.steampowered.com/app/370360/
 
