@@ -52,7 +52,7 @@ require(['Display', 'PuzzleLoader', 'Computer', 'Node', 'Opcode'], function (Dis
 		}
 	});
 
-	PuzzleLoader.loadFromURL('puzzles/00_initial.lua', function (puzzle1) {
+	PuzzleLoader.loadFromURL('puzzles/01_diagnostic_solution.lua', function (puzzle1) {
 		the_puzzle = puzzle1;
 		
 		puzzle1.start();
